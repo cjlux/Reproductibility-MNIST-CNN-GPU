@@ -174,6 +174,7 @@ def plot_loss_accuracy(hist:list,
 
     plt.show()
 
+
 def plot_images(image_array:np.ndarray, 
                 R:int, C:int, r:int=0,
                 figsize:tuple=None, 
@@ -229,4 +230,90 @@ def scan_dir(path):
         else:
             tree += f'{item[0]}/\n'
     return tree
+
+def plot_loss_accuracy_vs_hyperparam(hist:list, 
+                                     train_data_set_size:int,
+                                     min_acc:float=None,
+                                     max_acc:float=None,
+                                     min_loss:float=None,
+                                     max_loss:float=None, 
+                                     plot_train:bool=True, 
+                                     plot_valid:bool=True,
+                                     figsize=(15,5)):
+    '''
+    Plot training & validation loss & accuracy values, giving an argument
+    'hist' of type 'tensorflow.python.keras.callbacks.History'. 
+    '''
     
+    custom_lines = [Line2D([0], [0], color='blue', lw=1, marker='o'),
+                    Line2D([0], [0], color='orange', lw=1, marker='o')]
+    colors = ('red', 'green', 'blue', 'orange', 'cyan', 'magenta')
+
+    title_acc = {(True, True): "Model Accuracy",
+             (True, False): "training Accuray",
+             (False, True): "Validation Accuracy"}
+    title_val = {(True, True): "Model Loss",
+             (True, False): "training Loss",
+             (False, True): "Validation Loss"}
+
+    if not isinstance(hist, list): hist = [hist]
+    
+    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=figsize)
+    fig.suptitle(f"Model trained on {get_cpu_info()['brand_raw']}")
+
+    if plot_train and plot_valid: 
+        line = 'o:'
+    else:
+        line = 'o-'
+
+    # Plot training & validation accuracy
+    for (i, h) in enumerate(hist):
+        nb_epoch    = h.params['nb_epoch']
+        batch_size  = h.params['batch_size']
+        elaps_time  = h.params['elaps'].split()[2]
+        epoch_array = np.array(h.epoch)+1
+
+        if h.history.get('accuracy') and plot_train:
+            ax1.plot(epoch_array, h.history['accuracy'], line, markersize=4,
+                     color=colors[i], label=f'train - batch_size:{batch_size} - {elaps_time}')
+        if h.history.get('val_accuracy') and plot_valid:
+            ax1.plot(epoch_array, h.history['val_accuracy'], 'o-', markersize=4,
+                     color=colors[i], label=f'valid - batch_size:{batch_size} - {elaps_time}')
+    ax1.set_title(title_acc[(plot_train, plot_valid)])
+    ax1.set_ylabel('Accuracy')
+    ax1.set_xlabel('Epoch') 
+    y_min, y_max = ax1.get_ylim()
+    if min_acc is not None: y_min = min_acc
+    if max_acc is not None: y_max = max_acc
+    ax1.set_ylim((y_min, y_max))
+    ax1.grid(which='major', color='xkcd:cool grey',  linestyle='-',  alpha=0.7)
+    ax1.grid(which='minor', color='xkcd:light grey', linestyle='--', alpha=0.5)
+    ax1.legend(loc='lower right')
+    #ax1.set_xticks(np.arange(1, len(h.epoch)+1))
+    
+    
+    # Plot training & validation loss values
+    for (i, h) in enumerate(hist):
+        nb_epoch   = h.params['nb_epoch']
+        batch_size = h.params['batch_size']
+        elaps_time = h.params['elaps'].split()[2]
+        epoch_array = np.array(h.epoch)+1
+        if h.history.get('loss') and plot_train:
+            ax2.plot(epoch_array, h.history['loss'], line, markersize=4,
+                     color=colors[i], label=f'train - batch_size:{batch_size} - {elaps_time}')
+        if h.history.get('val_loss') and plot_valid:
+            ax2.plot(epoch_array, h.history['val_loss'], 'o-', markersize=4,
+                     color=colors[i], label=f'valid - batch_size:{batch_size} - {elaps_time}')
+    ax2.set_title(title_val[(plot_train, plot_valid)])
+    ax2.set_ylabel('Loss')
+    ax2.set_xlabel('Epoch')
+    y_min, y_max = ax2.get_ylim()
+    if min_loss is not None: y_min = min_loss
+    if max_loss is not None: y_max = max_loss
+    ax2.set_ylim((y_min, y_max))
+    ax2.grid(which='major', color='xkcd:cool grey',  linestyle='-',  alpha=0.7)
+    ax2.grid(which='minor', color='xkcd:light grey', linestyle='--', alpha=0.5)
+    ax2.legend(loc='upper right')
+    #ax2.set_xticks(np.arange(1, len(h.epoch)+1))
+
+    plt.show()
