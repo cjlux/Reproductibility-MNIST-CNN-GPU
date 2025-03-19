@@ -10,6 +10,8 @@ wheels/
 # Project files
 weights/
 models/
+trash/
+README.jlc
 
 # Virtual environments
 .venv

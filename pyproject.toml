@@ -17,4 +17,6 @@ dependencies = [
     "seaborn>=0.13.2",
     "py-cpuinfo>=9.0.0",
     "lab>=8.4",
+    "nbconvert[pandoc,qtpdf,webpdf]>=7.16.6",
+    "pandoc>=2.4",
 ]
