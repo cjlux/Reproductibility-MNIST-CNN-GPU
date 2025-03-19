@@ -10,6 +10,8 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from time import time
 from cpuinfo import get_cpu_info
+import tensorflow as tf
+import GPUtil
 
 def display_history_stat(hist:list):
     metrics = ('accuracy', 'loss', 'val_accuracy', 'val_loss')
@@ -122,7 +124,13 @@ def plot_loss_accuracy(hist:list,
     nb_epoch = len(epoch_array)
 
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=figsize)
-    fig.suptitle(f"Model trained on {get_cpu_info()['brand_raw']}")
+
+    if tf.config.list_physical_devices('GPU'):
+        device = f"GPU [{GPUtil.getGPUs()[0].name}]"
+    else:
+        device = f"CPU [{get_cpu_info()['brand_raw']}]"
+    
+    fig.suptitle(f"Model trained on {device}")
 
     for (i, h) in enumerate(hist):
         if h.history.get('accuracy') and training:
@@ -259,8 +267,13 @@ def plot_loss_accuracy_vs_hyperparam(hist:list,
     if not isinstance(hist, list): hist = [hist]
     
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=figsize)
-    fig.suptitle(f"Model trained on {get_cpu_info()['brand_raw']}")
 
+    if tf.config.list_physical_devices('GPU'):
+        device = f"GPU [{GPUtil.getGPUs()[0].name}]"
+    else:
+        device = f"CPU [{get_cpu_info()['brand_raw']}]"
+    fig.suptitle(f"Model trained on {device}")
+    
     if plot_train and plot_valid: 
         line = 'o:'
     else:
