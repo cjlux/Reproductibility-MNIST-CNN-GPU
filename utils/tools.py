@@ -229,6 +229,7 @@ def show_conf_matrix(actual_label, predicted_labels, classes, figsize=(8,7)):
     plt.show()
     
 def scan_dir(path):
+    import os
     tree = ''
     data = [item for item in os.walk(path)]
     for item in data:
